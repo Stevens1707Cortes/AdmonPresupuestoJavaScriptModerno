@@ -2,6 +2,7 @@
 
 const formularioGasto = document.querySelector('#agregar-gasto');
 const listadoGastos = document.querySelector('#gastos ul');
+const btnPDF = document.querySelector('#generar-pdf');
 
 
 
@@ -17,6 +18,9 @@ function cargarEventListeners() {
 
     // Eventos formulario
     formularioGasto.addEventListener('submit', agregarGasto);
+
+    //Generar Pdf
+    btnPDF.addEventListener('click', crearPDF);
 }
 
 
@@ -254,4 +258,49 @@ function eliminarGasto(id) {
     ui.actualizarRestante(restante);
 
     ui.comprobarPresupuesto(presupuesto);
+}
+
+function crearPDF() {
+    const mes = new Date().getMonth() + 1;
+    const year = new Date().getFullYear();
+    const {gastos, restante} = presupuesto;
+    const pdfLista = new jsPDF();
+
+    // Establece el color de relleno y dibuja un rectángulo para simular el fondo
+    pdfLista.setFillColor(224, 224, 224); 
+    pdfLista.rect(10, 10, 190, 200, 'F');
+
+    // Titulo
+    pdfLista.setFontSize(20);
+    pdfLista.setTextColor(90,169,169);
+    pdfLista.text(20, 30, `Lista de gastos: Mes ${mes}, Año ${year}`);
+
+    let lugarLista = 50;
+
+    // Texto en PDF de cada gasto
+    gastos.forEach((gasto, index) => {
+
+        const {nombreGasto, cantidadGasto} = gasto;
+        const contenido = `${index + 1}. ${nombreGasto}. Gasto: $ ${cantidadGasto} pesos`;
+        pdfLista.setFontSize(12);
+        pdfLista.setTextColor(0,0,0);
+        pdfLista.text(20, lugarLista, contenido);
+        lugarLista += 10;
+    })
+
+    let presupuestoLugar = lugarLista + 10;
+    let restanteLugar = presupuestoLugar + 10;
+
+    // Texto del presupuesto y el restante
+    pdfLista.setFontSize(20);
+    pdfLista.setTextColor(90,169,169);
+    pdfLista.text(20, presupuestoLugar, `Presupuesto: $ ${presupuesto.presupuesto} pesos`);
+    pdfLista.setFontSize(20);
+    pdfLista.setTextColor(242,82,114);
+    pdfLista.text(20, restanteLugar, `Restante: $ ${restante} pesos`);
+
+    // Guardar / Descargar PDF
+
+    pdfLista.save('ListaDeGastos.pdf');
+
 }
